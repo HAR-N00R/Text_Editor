@@ -22,8 +22,18 @@ class TextEditor {
     void loadDocument();
 
 
+    //Search fucntion
+    bool search(std::string& text) const;
+    void replaceText(const std::string& text, const std::string& replaceWith, std::size_t line);
+    void replaceAllText(const std::string& text, const std::string& replaceWith);
+
+    //Statistics
+    void displayStatistics() const;
+
     //Helper Functions Below
+    bool documentValidity() const;
     bool documentValidity(std::size_t index) const;
+    std::size_t wordCounter() const;
 };
 
 #endif
