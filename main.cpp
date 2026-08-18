@@ -29,15 +29,18 @@ int menu() {
     std::cout << " 7. Clear Document" << std::endl;
     std::cout << " 8. Display Statistics" << std::endl;
     std::cout << " 9. Save Document" << std::endl;
-    std::cout << " 10. Load File" << std::endl;
-    std::cout << " 11. Quit" << std::endl;
+    std::cout << " 10. Save As " << std::endl;
+    std::cout << " 11. Load File" << std::endl;
+    std::cout << " 12. Undo" << std::endl;
+    std::cout << " 13. Redo" << std::endl;
+    std::cout << " 14. Quit" << std::endl;
 
     int input;
     inputValidator(input);
 
     while (true) {
         if (input == 1 || input == 2 || input == 3 || input == 4 || input == 5 || input == 6 || input == 7 || input == 8
-            || input == 9 || input == 10 || input ==11) {
+            || input == 9 || input == 10 || input == 11 || input == 12 || input == 13 || input == 14) {
             return input;
         }
         else {
@@ -53,8 +56,11 @@ int menu() {
             std::cout << " 7. Clear Document" << std::endl;
             std::cout << " 8. Display Statistics" << std::endl;
             std::cout << " 9. Save Document" << std::endl;
-            std::cout << " 10. Load File" << std::endl;
-            std::cout << " 11. Quit" << std::endl;
+            std::cout << " 10. Save As " << std::endl;
+            std::cout << " 11. Load File" << std::endl;
+            std::cout << " 12. Undo" << std::endl;
+            std::cout << " 13. Redo" << std::endl;
+            std::cout << " 14. Quit" << std::endl;
             inputValidator(input);
         }
     }
@@ -117,7 +123,7 @@ int main()
                         std::cout << "Enter Line where to replace text" << std::endl;
                         int lineNumber;
                         inputValidator(lineNumber);
-                        while (lineNumber == 0) {
+                        while (lineNumber <= 0) {
                             std::cout << "invalid Line Number" << std::endl;
                             std::cout << "Enter line to edit: ";
                             inputValidator(lineNumber);
@@ -171,10 +177,54 @@ int main()
             input = menu();
         }
         else if (input == 10) {
-            textEditor.loadDocument();
+            textEditor.saveAsDocument();
             input = menu();
         }
         else if (input == 11) {
+            if (textEditor.isModified()) {
+                std::cout << "Document contains unsaved modifications" << std::endl;
+                std::cout << std::string(60,'=') << std::endl;
+                std::cout << "Please select one of the operations:" << std::endl;
+                std::cout << "1. Save" << std::endl << "2. Override Load" << std::endl << "3. Exit to Main Menu" <<
+                    std::endl;
+                int option;
+                inputValidator(option);
+                while (option != 1 && option != 2 && option != 3) {
+                    std::cout << "Invalid selection" << std::endl;
+                    std::cout << "Please select one of the operations:" << std::endl;
+                    std::cout << "1. Save" << std::endl << "2. Override Load" << std::endl << "3. Exit to Main Menu" <<
+                        std::endl;
+                    inputValidator(option);
+                }
+                if (option == 1) {
+                    textEditor.saveDocument();
+                    textEditor.clearPath();
+                    textEditor.loadDocument();
+                    input = menu();
+                }
+                else if (option == 2) {
+                    textEditor.clearPath();
+                    textEditor.loadDocument();
+                    input = menu();
+                }
+                else if (option == 3) {
+                    input = menu();
+                }
+            }
+            else {
+                textEditor.loadDocument();
+                input = menu();
+            }
+        }
+        else if (input == 12) {
+            textEditor.undo();
+            input = menu();
+        }
+        else if (input == 13) {
+            textEditor.redo();
+            input = menu();
+        }
+        else if (input == 14) {
             return 0;
         }
     }

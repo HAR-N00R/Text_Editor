@@ -15,14 +15,19 @@ void TextEditor::displayDocument() const {
 }
 
 void TextEditor::addLine(const std::string& text) {
+    saveState();
     document.push_back(text);
+    setModified(true);
 }
 
 void TextEditor::editLine(const std::string& text, std::size_t index) {
     if (!documentValidity(index)) {
         return;
     }
+    
+    saveState();
     document[index] = text;
+    setModified(true);
 
 }
 
@@ -30,7 +35,10 @@ void TextEditor::deleteLine(std::size_t index) {
     if (!documentValidity(index)) {
         return;
     }
+    
+    saveState();
     document.erase(document.begin() + index);
+    setModified(true);
 }
 
 void TextEditor::clearDocument() {
@@ -39,60 +47,90 @@ void TextEditor::clearDocument() {
         std::cout << std::string(60,'=') << std::endl;
     }
     else {
+        saveState();
         std::cout << "Clearing document" << std::endl;
         document.clear();
+        setModified(true);
         std::cout << std::string(60,'=') << std::endl;
     }
 }
 
 //File I/O
 
+std::string TextEditor::getCurrentFile() const {
+    return currentFile;
+}
+
+void TextEditor::setCurrentFile(const std::string& file) {
+    currentFile = file;
+}
+
+bool TextEditor::getModified() const {
+    return modified;
+}
+
+void TextEditor::setModified(bool modified) {
+    this->modified = modified;
+}
+
 void TextEditor::saveDocument() {
+    std::string path = getCurrentFile();
+    if (path.empty()) {
+        std::cout << "Enter the file path where to save the document: ";
+        std::getline(std::cin, path);
+    }
+    save(path);
+}
+
+void TextEditor::saveAsDocument() {
     std::string path;
     std::cout << "Enter the file path where to save the document: ";
     std::getline(std::cin, path);
+    save(path);
+}
 
+void TextEditor::save(const std::string& path) {
     std::ofstream file(path);
     if (!file) {
         std::cout << "Failed to open file." << std::endl;
     }
     else {
+        setCurrentFile(path);
         for (std::size_t i = 0; i < document.size(); i++) {
             file << document[i] << std::endl;
         }
         std::cout << "Save Successful" << std::endl;
+        setModified(false);
         std::cout << std::string(60,'=') << std::endl;
     }
 }
 
 void TextEditor::loadDocument() {
-    if (!document.empty()) {
-        std::cout << "Document is not Empty" << std::endl;
-        std::cout << "Please save or clear document" << std::endl;
-        std::cout << std::string(60,'=') << std::endl;
-        return;
+    std::string path = getCurrentFile();
+    if (path.empty()) {
+        std::cout << "Enter the file path where to load the document: ";
+        std::getline(std::cin, path);
     }
-
-    std::string path;
-    std::cout << "Enter the file path where to load the document: ";
-    std::getline(std::cin, path);
 
     std::ifstream file(path);
     if (!file) {
         std::cout << "Failed to open file." << std::endl;
     }
     else {
+        document.clear();
+        setCurrentFile(path);
         std::string line;
         while (std::getline(file, line)) {
             document.push_back(line);
         }
         std::cout << "Load Successful" << std::endl;
+        setModified(false);
         std::cout << std::string(60,'=') << std::endl;
     }
 }
 
 
-bool TextEditor::search(std::string& text) const {
+bool TextEditor::search(const std::string& text) const {
     if (!documentValidity()) {
         std::cout << "Document is Empty" << std::endl;
         return false;
@@ -129,7 +167,10 @@ void TextEditor::replaceText(const std::string& text, const std::string& replace
         return;
     }
     if (document[line].find(text) != std::string::npos) {
+
+        saveState();
         std::cout << "Text replaced" << std::endl;
+        setModified(true);
         document[line].replace(document[line].find(text),text.length(),replaceWith);
         std::cout << std::string(60,'=') << std::endl;
     }
@@ -147,6 +188,7 @@ void TextEditor::replaceAllText(const std::string& text, const std::string& repl
     }
     int replaced = 0;
     int occurrences = 0;
+    std::vector<std::string> backup = document;
     for (std::size_t i = 0; i < document.size(); i++) {
         bool textFound = false;
         std::size_t pos = 0;
@@ -162,10 +204,12 @@ void TextEditor::replaceAllText(const std::string& text, const std::string& repl
     }
     std::cout << std::string(60,'=') << std::endl;
     if (replaced > 0) {
-    std::cout << "Replaced " << occurrences << " occurrences on " << replaced << " lines containing text" << std::endl;
+        setModified(true);
+        saveState(backup);
+        std::cout << "Replaced " << occurrences << " occurrences on " << replaced << " lines containing text" << std::endl;
     }
     if (replaced == 0) {
-        std::cout << "Not to Replace" << std::endl;
+        std::cout << "Nothing to Replace" << std::endl;
     }
     std::cout << std::string(60,'=') << std::endl;
 }
@@ -216,14 +260,12 @@ std::size_t TextEditor::wordCounter() const {
         const std::string& line = document[i];
         bool word = false;
         for (char x: line) {
-            if (x != ' ') {
+            if (!std::isspace(x)) {
                 word = true;
             }
-            if (x == ' ') {
-                if (word) {
-                    words++;
-                    word = false;
-                }
+            else if (word) {
+                words++;
+                word = false;
             }
         }
         if (word) {
@@ -231,4 +273,51 @@ std::size_t TextEditor::wordCounter() const {
         }
     }
     return words;
+}
+
+bool TextEditor::isModified() const {
+    return getModified();
+}
+
+void TextEditor::clearPath() {
+    setCurrentFile("");
+}
+
+// Undo/Redo
+void TextEditor::undo() {
+    if (undoStack.empty()) {
+        std::cout << "Undo unavailble" << std::endl;
+        return;
+    }
+    redoStack.push(document);
+    document = undoStack.top();
+    undoStack.pop();
+    modified = true;
+}
+
+void TextEditor::redo() {
+    if (redoStack.empty()) {
+        std::cout << "Redo unavailble" << std::endl;
+        return;
+    }
+    undoStack.push(document);
+    document = redoStack.top();
+    redoStack.pop();
+    modified = true;
+}
+
+void TextEditor::emptyRedoStack() {
+    while (!redoStack.empty()) {
+        redoStack.pop();
+    }
+}
+
+void TextEditor::saveState() {
+    undoStack.push(document);
+    emptyRedoStack();
+}
+
+void TextEditor::saveState(const std::vector<std::string>& originalDocument) {
+    undoStack.push(originalDocument);
+    emptyRedoStack();
 }

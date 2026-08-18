@@ -4,10 +4,28 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <stack>
 
 class TextEditor {
     private:
     std::vector <std::string> document;
+    std::string currentFile;
+    bool modified = false;
+    std::stack<std::vector<std::string>> undoStack;
+    std::stack<std::vector<std::string>> redoStack;
+
+    std::string getCurrentFile() const;
+    void setCurrentFile(const std::string& file);
+    bool getModified() const;
+    void setModified(bool modified);
+
+    //Helper Functions Below
+    std::size_t wordCounter() const;
+    void save(const std::string& path);
+    void emptyRedoStack();
+    void saveState();
+    void saveState(const std::vector<std::string>& originalDocument);
+
 
     public:
     void displayDocument() const;
@@ -19,11 +37,12 @@ class TextEditor {
 
     //File I/O
     void saveDocument();
+    void saveAsDocument();
     void loadDocument();
 
 
     //Search fucntion
-    bool search(std::string& text) const;
+    bool search(const std::string& text) const;
     void replaceText(const std::string& text, const std::string& replaceWith, std::size_t line);
     void replaceAllText(const std::string& text, const std::string& replaceWith);
 
@@ -33,7 +52,13 @@ class TextEditor {
     //Helper Functions Below
     bool documentValidity() const;
     bool documentValidity(std::size_t index) const;
-    std::size_t wordCounter() const;
+    bool isModified() const;
+    void clearPath();
+
+    //Undo/Redo
+    void undo();
+    void redo();
+
 };
 
 #endif
