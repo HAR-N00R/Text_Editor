@@ -1,9 +1,7 @@
 #ifndef TEXT_EDITOR_TEXTEDITOR_H
 #define TEXT_EDITOR_TEXTEDITOR_H
 #include <string>
-#include <iostream>
 #include <vector>
-#include <fstream>
 #include <stack>
 
 class TextEditor {
@@ -21,7 +19,8 @@ class TextEditor {
 
     //Helper Functions Below
     std::size_t wordCounter() const;
-    void save(const std::string& path);
+    bool save(const std::string& path);
+    void emptyUndoStack();
     void emptyRedoStack();
     void saveState();
     void saveState(const std::vector<std::string>& originalDocument);
@@ -33,27 +32,27 @@ class TextEditor {
     void editLine(const std::string& text, std::size_t index);
     void deleteLine(std::size_t index);
     void clearDocument();
+    bool hasCurrentFile() const;
 
 
     //File I/O
-    void saveDocument();
-    void saveAsDocument();
-    void loadDocument();
+    bool saveDocument();
+    bool saveAsDocument(const std::string& path);
+    bool loadDocument(const std::string& path);
 
 
     //Search fucntion
     bool search(const std::string& text) const;
-    void replaceText(const std::string& text, const std::string& replaceWith, std::size_t line);
-    void replaceAllText(const std::string& text, const std::string& replaceWith);
+    bool replaceText(const std::string& text, const std::string& replaceWith, std::size_t line);
+    bool replaceAllText(const std::string& text, const std::string& replaceWith);
 
     //Statistics
     void displayStatistics() const;
 
     //Helper Functions Below
-    bool documentValidity() const;
-    bool documentValidity(std::size_t index) const;
+    void isDocumentEmpty() const;
+    void isIndexValid(std::size_t index) const;
     bool isModified() const;
-    void clearPath();
 
     //Undo/Redo
     void undo();
