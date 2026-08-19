@@ -191,7 +191,11 @@ int main() {
                 std::cout << std::string(60, '=') << std::endl;
             }
             else if (input == 8) {
-                textEditor.displayStatistics();
+                DocumentStatistics statistics = textEditor.getStatistics();
+                std::cout << "Characters: " << statistics.characters << std::endl;
+                std::cout << "Words: " << statistics.words << std::endl;
+                std::cout << "Lines: " << statistics.lines << std::endl;
+                std::cout << std::string(60, '=') << std::endl;
             }
             else if (input == 9) {
                 if (saveWithPrompt(textEditor)) {

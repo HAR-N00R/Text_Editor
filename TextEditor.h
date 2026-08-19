@@ -4,6 +4,10 @@
 #include <vector>
 #include <stack>
 
+struct DocumentStatistics {
+    std::size_t characters, words, lines;
+};
+
 class TextEditor {
     private:
     std::vector <std::string> document;
@@ -47,7 +51,7 @@ class TextEditor {
     bool replaceAllText(const std::string& text, const std::string& replaceWith);
 
     //Statistics
-    void displayStatistics() const;
+    DocumentStatistics getStatistics() const;
 
     //Helper Functions Below
     void isDocumentEmpty() const;

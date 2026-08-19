@@ -180,16 +180,14 @@ bool TextEditor::replaceAllText(const std::string& text, const std::string& repl
 }
 
 
-void TextEditor::displayStatistics() const {
+DocumentStatistics TextEditor::getStatistics() const {
     isDocumentEmpty();
     std::size_t characters = 0;
     for (std::size_t i = 0; i < document.size(); i++) {
         characters += document[i].length();
     }
-    std::cout << "Characters: " << characters << std::endl;
-    std::cout << "Words: " << wordCounter() << std::endl;
-    std::cout << "Lines: " << document.size() << std::endl;
-    std::cout << std::string(60,'=') << std::endl;
+    return {characters,wordCounter(), document.size()};
+
 }
 
 //helper function
