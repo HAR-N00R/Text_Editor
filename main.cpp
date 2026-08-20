@@ -25,6 +25,37 @@ bool saveWithPrompt(TextEditor& textEditor) {
     return textEditor.saveAsDocument(path);
 }
 
+bool searchText(const std::string& text,const TextEditor& textEditor) {
+    textEditor.isDocumentEmpty();
+    if (text.empty()) {
+        std::cout << "Search Text cannot be Empty" << std::endl;
+        std::cout << std::string(60, '=') << std::endl;
+        return false;
+    }
+    std::queue<std::size_t> indexes;
+    textEditor.searchResults(text,indexes);
+
+    std::size_t occurrences = indexes.size();
+    if (indexes.empty()) {
+        std::cout << "Text not found" << std::endl;
+        std::cout << std::string(60, '=') << std::endl;
+        return false;
+    }
+
+    std::cout << "Displaying Search Results Below:" << std::endl;
+
+    while (!indexes.empty()) {
+        std::size_t index = indexes.front();
+        std::cout << (index + 1) << ": " << textEditor.getCurrentLine(index) << std::endl;
+        indexes.pop();
+    }
+
+    std::cout << std::string(60, '=') << std::endl;
+    std::cout << "Found " << occurrences << " lines containing text" << std::endl;
+    std::cout << std::string(60, '=') << std::endl;
+    return true;
+}
+
 bool loadWithPrompt(TextEditor& textEditor) {
     std::string path;
     std::cout << "Enter the file path where to load the document: ";
@@ -98,22 +129,27 @@ int main() {
             }
             else if (input == 2) {
                 textEditor.isDocumentEmpty();
+                std::size_t documentSize = textEditor.getLineCount();
                 std::cout << "Displaying stored text below:" << std::endl;
-                textEditor.displayDocument();
+                for (std::size_t index = 0; index < documentSize; index++) {
+                    std::cout << (index +1) << ": " << textEditor.getCurrentLine(index) << std::endl;
+                }
+                std::cout << std::string(60, '=') << std::endl;
             }
             else if (input == 3) {
                 textEditor.isDocumentEmpty();
                 std::cout << "Search: ";
                 std::string text;
                 std::getline(std::cin, text);
-                textEditor.search(text);
+                std::cout << std::string(60, '=') << std::endl;
+                searchText(text, textEditor);
             }
             else if (input == 4) {
                 textEditor.isDocumentEmpty();
                 std::cout << "Replace text: ";
                 std::string text;
                 std::getline(std::cin, text);
-                if (textEditor.search(text)) {
+                if (searchText(text, textEditor)) {
                     std::cout << "1. Replace All" << std::endl << "2. Replace in Specific Line" << std::endl;
                     int option;
                     inputValidator(option);

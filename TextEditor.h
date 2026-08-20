@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <queue>
 
 struct DocumentStatistics {
     std::size_t characters, words, lines;
@@ -31,7 +32,6 @@ class TextEditor {
 
 
     public:
-    void displayDocument() const;
     void addLine(const std::string& text);
     void editLine(const std::string& text, std::size_t index);
     void deleteLine(std::size_t index);
@@ -46,7 +46,7 @@ class TextEditor {
 
 
     //Search fucntion
-    bool search(const std::string& text) const;
+    void searchResults(const std::string& text, std::queue<std::size_t>& indexes) const;
     bool replaceText(const std::string& text, const std::string& replaceWith, std::size_t line);
     bool replaceAllText(const std::string& text, const std::string& replaceWith);
 
@@ -57,6 +57,8 @@ class TextEditor {
     void isDocumentEmpty() const;
     void isIndexValid(std::size_t index) const;
     bool isModified() const;
+    std::size_t getLineCount() const;
+    const std::string& getCurrentLine(std::size_t index) const;
 
     //Undo/Redo
     void undo();

@@ -1,14 +1,28 @@
 #include "TextEditor.h"
 #include <fstream>
-#include <iostream>
-#include <exception>
+#include <stdexcept>
 
-void TextEditor::displayDocument() const {
+std::size_t TextEditor::getLineCount() const {
+    return document.size();
+}
+
+const std::string& TextEditor::getCurrentLine(std::size_t index) const {
     isDocumentEmpty();
-    for (std::size_t i = 0; i < document.size(); i++) {
-        std::cout << (i + 1) << ": " << document[i] << std::endl;
+    isIndexValid(index);
+    return document[index];
+}
+
+void TextEditor::searchResults(const std::string& text, std::queue<std::size_t>& indexes) const {
+    isDocumentEmpty();
+    if (text.empty()) {
+        return;
     }
-    std::cout << std::string(60,'=') << std::endl;
+    for (std::size_t i = 0; i < document.size(); i++) {
+        std::size_t pos = document[i].find(text);
+        if (pos != std::string::npos) {
+            indexes.push(i);
+        }
+    }
 }
 
 void TextEditor::addLine(const std::string& text) {
@@ -101,34 +115,6 @@ bool TextEditor::loadDocument(const std::string& path) {
         }
         setModified(false);
         return true;
-}
-
-
-bool TextEditor::search(const std::string& text) const {
-    isDocumentEmpty();
-    if (text.empty()) {
-        std::cout << "Search with is empty" << std::endl;
-        return false;
-    }
-    int found = 0;
-    for (std::size_t i = 0; i < document.size(); i++) {
-        if (document[i].find(text) != std::string::npos) {
-            found++;
-            if (found == 1) {
-                std::cout << "Text found on the following lines:" << std::endl;
-            }
-            std::cout << (i + 1) << ": " << document[i] << std::endl;
-        }
-    }
-    if (found == 0) {
-        std::cout << "Not found" << std::endl;
-        std::cout << std::string(60,'=') << std::endl;
-        return false;
-    }
-    std::cout << std::string(60,'=') << std::endl;
-    std::cout << "Found " << found << " lines containing text" << std::endl;
-    std::cout << std::string(60,'=') << std::endl;
-    return true;
 }
 
 
